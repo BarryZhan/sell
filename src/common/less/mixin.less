@@ -1,0 +1,22 @@
+.ellipsis(...) {
+  overflow: hidden;
+}
+.ellipsis() {
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ellipsis(@line-number) {
+  display: -webkit-box;
+  -webkit-line-clamp: @line-number;
+  -webkit-box-orient: vertical;
+}
+
+.for(@list) {
+  .loop(@index:1) when ( @index<=length(@list) ) {
+    @item: extract(@list, @index);
+    .each(@item); //这里的each相当于一个抽象方法，谁调用for谁来实现
+    .loop(@index + 1);
+  }
+  .loop();
+}
