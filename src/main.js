@@ -4,9 +4,11 @@ import Goods from 'components/goods/goods'
 import VueRouter from 'vue-router'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
+import Vuex from 'vuex'
 
 Vue.use(VueRouter)
 Vue.use(VueAxios, axios)
+Vue.use(Vuex)
 
 const CODE_OK = 0
 

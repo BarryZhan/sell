@@ -11,10 +11,21 @@
       <p class="sendMoney">另需配送费￥{{deliveryPrice}}元</p>
     </div>
     <p class="cart-settle" :class="{'on':this.totalPrice >= this.minPrice}">{{payDesc}}</p>
+    <div class="ball-container">
+      <transition name="drop"
+                  @before-enter="beforeEnter"
+                  @enter="enter"
+                  @after-enter="afterEnter"
+                  v-for="(ball,index) in balls">
+        <div v-show="ball.show" class="ball">
+          <div class="inner inner-hook"></div>
+        </div>
+      </transition>
+    </div>
   </div>
 </template>
 
-<script lang="">
+<script type="text/ecmascript-6">
   export default {
     props: {
       selectFoods: {
@@ -33,7 +44,29 @@
       }
     },
     data () {
-      return {}
+      return {
+        balls: [
+          {
+            show: false
+          },
+          {
+            show: false
+          },
+          {
+            show: false
+          },
+          {
+            show: false
+          },
+          {
+            show: false
+          }
+        ],
+        dropBall: []
+      }
+    },
+    created () {
+      this.$parent.$on('cart.add', this._drop)
     },
     computed: {
       totalPrice () {
@@ -60,9 +93,61 @@
           return `去结算`
         }
       }
-
+    },
+    methods: {
+      beforeEnter: function (el) {
+        console.log('before')
+        let count = this.balls.length
+        while (count--) {
+          let ball = this.balls[count]
+          if (ball.show) {
+            let rect = ball.el.getBoundingClientRect()
+            let x = rect.left - 32
+            let y = -(window.innerHeight - rect.top - 22)
+            el.style.display = ''
+            el.style.webkitTransform = `transform3d(0,${y},0)`
+            el.style.transform = `transform3d(0,${y},0)`
+            let inner = el.querySelector('.inner-hook')
+            inner.style.webkitTransform = `transform3d(${x},0,0)`
+            inner.style.transform = `transform3d(${x},0,0)`
+            inner.style.background = 'red'
+          }
+        }
+      },
+      enter: function (el) {
+        let rf = el.offsetHeight
+        this.$nextTick(() => {
+          console.log('enter')
+          el.style.webkitTransform = 'transform3d(200px,0,0)'
+          el.style.transform = 'transform3d(0,0,0)'
+          let inner = el.querySelector('.inner-hook')
+          inner.style.webkitTransform = 'transform3d(0,0,0)'
+          inner.style.transform = 'transform3d(0,0,0)'
+        })
+      },
+      afterEnter: function (el) {
+        console.log('afterEnter')
+        el.style.webkitTransform = 'transform3d(200px,0,0)'
+        let ball = this.dropBall.shift()
+        if (ball) {
+          ball.show = false
+          el.style.display = 'none'
+        }
+      },
+      _drop: function (el) {
+        for (let i = 0; i < this.balls.length; i++) {
+          let ball = this.balls[i]
+          if (!ball.show) {
+            ball.show = true
+            ball.el = el
+            this.dropBall.push(ball)
+            return
+          }
+        }
+      }
     }
   }
+
 </script>
 
 <style lang="less" rel="stylesheet/less">
@@ -139,6 +224,27 @@
     &.on {
       background-color: #00b43c;
       color: #ffffff;
+    }
+  }
+
+  .ball-container {
+    .ball {
+      position: fixed;
+      left: 32px;
+      bottom: 20px;
+      z-index: 100;
+      .inner {
+        width: 16px;
+        height: 16px;
+        background-color: rgb(0, 160, 220);
+        border-radius: 50%;
+      }
+      &.drop-enter-active {
+        transition: all 0.4s cubic-bezier(0.49, -0.29, 0.75, 0.41);
+        .inner {
+          transition: all 0.4s linear;
+        }
+      }
     }
   }
 </style>

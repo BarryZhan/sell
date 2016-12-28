@@ -34,6 +34,7 @@
         } else {
           this.food.count += 1
         }
+        this.$parent.$parent.$emit('cart.add', event.target)
       },
       decrease (event) {
         if (!event._constructed) return
