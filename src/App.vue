@@ -12,15 +12,15 @@
         <router-link to="/seller">商家</router-link>
       </li>
     </ul>
-    <router-view class="view"></router-view>
-    <v-cart></v-cart>
+    <keep-alive>
+      <router-view :seller="seller"></router-view>
+    </keep-alive>
   </div>
 </template>
 
 <script>
   import header from 'components/header/header'
   import goods from 'components/goods/goods'
-  import shopCart from 'components/shopCart/shopCart'
 
   const CODE_OK = 0
 
@@ -41,8 +41,7 @@
       })
     },
     components: {
-      'v-header': header,
-      'v-cart': shopCart
+      'v-header': header
     }
   }
 </script>

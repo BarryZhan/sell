@@ -69,7 +69,6 @@
       }
     },
     created () {
-      window.a = this
       this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee']
     },
     components: {

@@ -1,53 +1,67 @@
 <template>
-  <div class="goods">
-    <div class="goods-menu" ref="goodsMenu">
-      <ul>
-        <li v-for="(item , index) of goods" :class="{'active':currentIndex === index}"
-            @click="selectMenu(index,$event)">
-          <p class="b-1px"><span><i v-if="item.type >= 0" :class="classMap[item.type]"></i>{{item.name}}</span></p>
-        </li>
-      </ul>
-    </div>
-    <div class="goods-content" ref="goodsContent">
-      <ul>
-        <li v-for="item of goods" class="food-list-hook">
-          <h2>{{item.name}}</h2>
-          <div class="foods">
-            <div class="food b-1px" v-for="item of item.foods">
-              <img :src="item.icon">
-              <div class="food-info">
-                <h3>{{item.name}}</h3>
-                <p class="food-desc" v-if="item.description">{{item.description}}</p>
-                <p class="food-sales">月售{{item.sellCount}}份 好评率{{item.rating}}%</p>
-                <p class="food-price"><span><i>￥</i>{{item.price}}</span>
-                  <del v-if="item.oldPrice"><i>￥</i>{{item.oldPrice}}</del>
-                </p>
-              </div>
-              <div class="food-cartControl">
-                <cartControl :food="item"></cartControl>
+  <div>
+    <div class="goods">
+      <div class="goods-menu" ref="goodsMenu">
+        <ul>
+          <li v-for="(item , index) of goods" :class="{'active':currentIndex === index}"
+              @click="selectMenu(index,$event)">
+            <p class="b-1px"><span><i v-if="item.type >= 0" :class="classMap[item.type]"></i>{{item.name}}</span></p>
+          </li>
+        </ul>
+      </div>
+      <div class="goods-content" ref="goodsContent">
+        <ul>
+          <li v-for="item of goods" class="food-list-hook">
+            <h2>{{item.name}}</h2>
+            <div class="foods">
+              <div class="food b-1px" v-for="item of item.foods" @click="selectFood(item,$event)">
+                <img :src="item.icon">
+                <div class="food-info">
+                  <h3>{{item.name}}</h3>
+                  <p class="food-desc" v-if="item.description">{{item.description}}</p>
+                  <p class="food-sales">月售{{item.sellCount}}份 好评率{{item.rating}}%</p>
+                  <p class="food-price"><span><i>￥</i>{{item.price}}</span>
+                    <del v-if="item.oldPrice"><i>￥</i>{{item.oldPrice}}</del>
+                  </p>
+                </div>
+                <div class="food-cartControl">
+                  <cartControl :food="item"></cartControl>
+                </div>
               </div>
             </div>
-          </div>
-        </li>
-      </ul>
+          </li>
+        </ul>
+      </div>
     </div>
+    <v-cart :select-foods="selectFoods" :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice"></v-cart>
+    <food :food="selectedFood" ref="foodDetail"></food>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import BScroll from 'better-scroll'
   import cartControl from 'components/cartcontrol/cartcontrol'
+  import food from 'components/food/food'
+  import shopCart from 'components/shopCart/shopCart'
   export default {
+    props: {
+      seller: {
+        type: Object
+      }
+    },
     name: 'goods',
     data () {
       return {
         goods: [],
         listHeight: [0],
-        scrollY: 0
+        scrollY: 0,
+        selectedFood: {}
       }
     },
     components: {
-      cartControl
+      cartControl,
+      food,
+      'v-cart': shopCart
     },
     created () {
       this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee']
@@ -75,9 +89,26 @@
           }
         }
         return 0
+      },
+      selectFoods () {
+        let foods = []
+        this.goods.forEach((good) => {
+          good.foods.forEach((food) => {
+            if (food.count) {
+              foods.push(food)
+            }
+          })
+        })
+        return foods
       }
     },
     methods: {
+      selectFood (food, event) {
+        if (!event._constructed) return
+        console.log(food)
+        this.selectedFood = food
+        this.$refs.foodDetail.toggleShow()
+      },
       selectMenu (index, event) {
         if (!event._constructed) return
         let foodList = this.$refs.goodsContent.querySelectorAll('.food-list-hook')
